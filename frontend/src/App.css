@@ -864,12 +864,6 @@ body {
   }
 }
 
-.searchbar__help {
-  margin: 0.3rem 0 0;
-  font-size: 0.75rem;
-  color: var(--ink-500);
-}
-
 /* --- error variant of the empty state --- */
 .empty-state--error {
   border-color: #f7c9c4;
@@ -914,6 +908,7 @@ body {
   color: var(--navy-900);
 }
 
+/* Longer text values (e.g. the active search term) read better smaller */
 .stats__item dd.stats__small {
   font-size: 0.82rem;
   font-weight: 600;
@@ -921,3 +916,4 @@ body {
   text-align: right;
   overflow-wrap: anywhere;
 }
+

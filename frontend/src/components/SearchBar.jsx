@@ -33,7 +33,6 @@ function SearchBar({ value = '', onChange, onClear, isSearching = false }) {
           value={value}
           onChange={(event) => onChange?.(event.target.value)}
           autoComplete="off"
-          aria-describedby="student-search-help"
         />
 
         {/* The spinner sits to the LEFT of the clear button rather than
@@ -52,10 +51,6 @@ function SearchBar({ value = '', onChange, onClear, isSearching = false }) {
           </button>
         )}
       </div>
-
-      <p className="searchbar__help" id="student-search-help">
-        Matches part of a name or student ID, ignoring case.
-      </p>
     </div>
   )
 }

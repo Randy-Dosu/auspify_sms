@@ -303,12 +303,6 @@ function App() {
                 <dd>{isLoading && students.length === 0 ? '—' : students.length}</dd>
               </div>
               <div className="stats__item">
-                <dt>Sorting by</dt>
-                <dd className="stats__small">
-                  {sort} · {order}
-                </dd>
-              </div>
-              <div className="stats__item">
                 <dt>Search</dt>
                 <dd className="stats__small">{searchTerm || 'none'}</dd>
               </div>
