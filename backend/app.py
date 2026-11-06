@@ -6,6 +6,8 @@ Steps implemented so far:
   * Step 0 - health route so the frontend can prove it can reach the API
   * Step 2 - automatic SQLite setup + POST /api/students (create)
   * Step 3 - PUT /api/students/<id> (update) and DELETE /api/students/<id>
+  * Step 4 - GET /api/students (?search=, ?sort=, ?order=) and
+             GET /api/students/<id>
 
 Run it with:
     python app.py
@@ -113,6 +115,27 @@ def fetch_student(db, student_id):
 
 
 # ---------------------------------------------------------------------------
+# Query options for GET /api/students
+# ---------------------------------------------------------------------------
+# Sorting needs the column name inside the SQL string, so it can never be a
+# raw query parameter. These whitelists are the safe way to do it: anything
+# not on the list is rejected instead of being pasted into the query.
+SORTABLE_COLUMNS = {
+    "id": "id",
+    "student_id": "student_id",
+    "full_name": "full_name",
+    "age": "age",
+    "gender": "gender",
+    "email": "email",
+    "course": "course",
+    "year": "year",
+    "created_at": "created_at",
+}
+DEFAULT_SORT = "created_at"
+DEFAULT_ORDER = "desc"
+
+
+# ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
 
@@ -124,6 +147,68 @@ def health():
         service="auspify-sms-api",
         message="Flask backend is running",
     ), 200
+
+
+
+@app.get("/api/students")
+def list_students():
+    """List students with optional search and sorting.
+
+    Query parameters (all optional):
+      search : matches full_name OR student_id (case-insensitive, partial)
+      sort   : id | student_id | full_name | age | gender | email | course |
+               year | created_at        (default: created_at)
+      order  : asc | desc             (default: desc)
+
+    Always returns: { "students": [...], "count": n }
+    A `count` field means the UI never has to guess the total.
+    """
+    search = (request.args.get("search") or "").strip()
+    sort = (request.args.get("sort") or DEFAULT_SORT).lower()
+    order = (request.args.get("order") or DEFAULT_ORDER).lower()
+
+    # Reject bad sort/order rather than silently ignoring them: a 400 tells
+    # the caller their query was wrong instead of hiding a typo.
+    if sort not in SORTABLE_COLUMNS:
+        return error_response(
+            f"Invalid sort field '{sort}'. Allowed: {', '.join(SORTABLE_COLUMNS)}",
+            400,
+        )
+    if order not in {"asc", "desc"}:
+        return error_response("Invalid order. Use 'asc' or 'desc'", 400)
+
+    # Whitelisted column + whitelisted direction => safe to build the SQL.
+    column = SORTABLE_COLUMNS[sort]
+    direction = "ASC" if order == "asc" else "DESC"
+
+    sql = "SELECT * FROM students"
+    params = ()
+
+    if search:
+        # LIKE with OR covers "search by name or ID". The % wildcards are
+        # added here, not typed by the user.
+        sql += " WHERE full_name LIKE ? OR student_id LIKE ?"
+        like = f"%{search}%"
+        params = (like, like)
+
+    # A secondary sort on id keeps results stable when values tie
+    # (e.g. two students with the same age).
+    sql += f" ORDER BY {column} {direction}, id {direction}"
+
+    db = get_db()
+    rows = db.execute(sql, params).fetchall()
+    students = [row_to_dict(row) for row in rows]
+
+    return jsonify(students=students, count=len(students)), 200
+
+
+@app.get("/api/students/<int:student_pk>")
+def get_student(student_pk):
+    """Fetch a single student by primary key. 404 when missing."""
+    student = fetch_student(get_db(), student_pk)
+    if student is None:
+        return error_response(f"Student {student_pk} not found", 404)
+    return jsonify(student), 200
 
 
 @app.post("/api/students")

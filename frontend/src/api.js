@@ -53,7 +53,10 @@ async function request(path, options = {}) {
       headers: { 'Content-Type': 'application/json' },
       ...options,
     })
-  } catch {
+  } catch (error) {
+    // An aborted request is NOT an error the user should see - the UI
+    // cancelled it on purpose (e.g. they typed another search letter).
+    if (error?.name === 'AbortError') throw error
     // fetch only rejects for network-level problems (server down, DNS, etc.)
     throw networkError()
   }
@@ -86,6 +89,27 @@ async function request(path, options = {}) {
 // ---------------------------------------------------------------------------
 // Student endpoints
 // ---------------------------------------------------------------------------
+
+/**
+ * GET /api/students - list students with optional search and sorting.
+ * @param {{search?: string, sort?: string, order?: 'asc'|'desc'}} options
+ * @returns {Promise<{students: object[], count: number}>}
+ */
+export function fetchStudents({ search = '', sort = 'created_at', order = 'desc', signal } = {}) {
+  // URLSearchParams handles the encoding for us (spaces, &, unicode, ...).
+  const params = new URLSearchParams()
+  if (search) params.set('search', search)
+  if (sort) params.set('sort', sort)
+  if (order) params.set('order', order)
+
+  const query = params.toString()
+  return request(`/students${query ? `?${query}` : ''}`, { signal })
+}
+
+/** GET /api/students/:id - one student. */
+export function fetchStudent(id) {
+  return request(`/students/${id}`)
+}
 
 /** POST /api/students - create a student. */
 export function createStudent(payload) {
