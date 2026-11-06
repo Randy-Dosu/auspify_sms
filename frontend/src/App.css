@@ -1,0 +1,919 @@
+/* ==========================================================================
+   Student Management System - Step 1 styles
+   Plain CSS only (no framework). Organised top-to-bottom in the same order
+   as the components so it is easy to find things:
+     1. Reset & design tokens
+     2. Layout shell (topbar, main)
+     3. Cards & buttons (shared)
+     4. Notification
+     5. Form
+     6. Search bar & toolbar
+     7. Table
+     8. Empty state
+     9. Dialog
+    10. Responsive tweaks
+   ========================================================================== */
+
+/* ---------- 1. Reset & design tokens ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  /* Colour palette - one place to change the whole theme */
+  --navy-900: #0b2545;
+  --navy-700: #13315c;
+  --blue-600: #1f5fa8;
+  --blue-500: #2c74c4;
+  --blue-050: #eef4fb;
+
+  --green-600: #1b7f4b;
+  --green-050: #e6f6ec;
+  --red-600: #b3261e;
+  --red-050: #fdecea;
+  --amber-600: #8d6e00;
+  --amber-050: #fff8e1;
+
+  --ink-900: #102a43;
+  --ink-700: #334e68;
+  --ink-500: #52606d;
+  --ink-300: #9fb3c8;
+  --line: #d9e2ec;
+  --surface: #ffffff;
+  --canvas: #f4f7fa;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-sm: 0 1px 2px rgba(16, 42, 67, 0.07);
+  --shadow-md: 0 4px 14px rgba(16, 42, 67, 0.1);
+
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  line-height: 1.5;
+  color: var(--ink-900);
+  background-color: var(--canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Accessible focus ring for keyboard users, on every interactive element */
+:focus-visible {
+  outline: 3px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+/* ---------- 2. Layout shell ---------- */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: linear-gradient(135deg, var(--navy-900), var(--navy-700));
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+.topbar__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.1rem 1.25rem;
+}
+
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.topbar__logo {
+  font-size: 1.9rem;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.45rem 0.55rem;
+}
+
+.topbar__title {
+  margin: 0;
+  font-size: clamp(1.1rem, 2.6vw, 1.45rem);
+  letter-spacing: 0.2px;
+}
+
+.main {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+/* Two-column area: form on the left, demo state panel on the right */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+/* ---------- 3. Cards & buttons ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 1.15rem 1.3rem 1.3rem;
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.card__title {
+  margin: 0;
+  font-size: 1.02rem;
+  color: var(--navy-900);
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--blue-600);
+  background: var(--blue-050);
+  border: 1px solid #cfe0f5;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  white-space: nowrap;
+}
+
+.badge--neutral {
+  color: var(--ink-700);
+  background: #f0f4f8;
+  border-color: var(--line);
+  text-transform: none;
+}
+
+/* Base button */
+.btn {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    transform 0.05s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn--primary {
+  background: var(--blue-600);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--primary:hover {
+  background: var(--navy-700);
+}
+
+.btn--ghost {
+  background: var(--surface);
+  color: var(--ink-700);
+  border-color: var(--line);
+}
+
+.btn--ghost:hover {
+  background: #f3f7fb;
+  border-color: var(--ink-300);
+}
+
+.btn--danger {
+  background: var(--red-600);
+  color: #fff;
+}
+
+.btn--danger:hover {
+  background: #8f1d17;
+}
+
+.btn--edit {
+  background: var(--blue-050);
+  color: var(--blue-600);
+  border-color: #cfe0f5;
+}
+
+.btn--edit:hover {
+  background: #dcebfa;
+}
+
+.btn--small {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.65rem;
+}
+
+/* ---------- 4. Notification ---------- */
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  border: 1px solid;
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.notification--success {
+  background: var(--green-050);
+  border-color: #b7e4c7;
+  color: var(--green-600);
+}
+
+.notification--error {
+  background: var(--red-050);
+  border-color: #f7c9c4;
+  color: var(--red-600);
+}
+
+.notification--info {
+  background: var(--blue-050);
+  border-color: #cfe0f5;
+  color: var(--blue-600);
+}
+
+.notification__icon {
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.notification__message {
+  margin: 0;
+  flex: 1;
+  color: var(--ink-900);
+  font-size: 0.9rem;
+}
+
+.notification__close {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.15rem;
+  opacity: 0.7;
+}
+
+.notification__close:hover {
+  opacity: 1;
+}
+
+/* ---------- 5. Form ---------- */
+.form__grid {
+  display: grid;
+  /* auto-fit keeps 2 columns on desktop, 1 on phones, with no media query */
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.form__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+
+.req {
+  color: var(--red-600);
+}
+
+.form__input {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink-900);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.65rem;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form__input:hover {
+  border-color: var(--ink-300);
+}
+
+.form__input:focus {
+  outline: none;
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(44, 116, 196, 0.18);
+}
+
+.form__input::placeholder {
+  color: var(--ink-300);
+}
+
+.form__hint {
+  margin: 0.8rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-500);
+}
+
+.form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+
+/* Demo-only panel showing the controlled form state */
+.state-panel__json {
+  margin: 0;
+  background: #0f172a;
+  color: #d7e3f4;
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 0.9rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  overflow-x: auto;
+}
+
+.state-panel__hint {
+  margin: 0.7rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-500);
+}
+
+/* ---------- 6. Search bar & toolbar ---------- */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.toolbar__demo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.searchbar {
+  flex: 1 1 340px;
+  max-width: 560px;
+}
+
+.searchbar__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-700);
+  margin-bottom: 0.3rem;
+}
+
+.searchbar__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchbar__icon {
+  position: absolute;
+  left: 0.6rem;
+  font-size: 0.85rem;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.searchbar__input {
+  font: inherit;
+  font-size: 0.9rem;
+  width: 100%;
+  padding: 0.55rem 2rem 0.55rem 2.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink-900);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.searchbar__input:focus {
+  outline: none;
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(44, 116, 196, 0.18);
+}
+
+/* Hide the browser's own clear "x" - we render our own */
+.searchbar__input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.searchbar__clear {
+  position: absolute;
+  right: 0.35rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--ink-500);
+  cursor: pointer;
+  padding: 0.2rem 0.35rem;
+  border-radius: 4px;
+}
+
+.searchbar__clear:hover {
+  background: #eef2f6;
+  color: var(--ink-900);
+}
+
+.searchbar__count {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-500);
+}
+
+/* ---------- 7. Table ---------- */
+.table-wrap {
+  /* Horizontal scroll on narrow screens instead of squashed columns */
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 900px; /* keeps columns readable; wrapper scrolls if needed */
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  background: #f0f4f8;
+  color: var(--ink-700);
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 0.6rem 0.7rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 0.62rem 0.7rem;
+  border-bottom: 1px solid #eef2f6;
+  vertical-align: middle;
+  color: var(--ink-900);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #fbfdff;
+}
+
+.table tbody tr:hover {
+  background: var(--blue-050);
+}
+
+.table__name {
+  font-weight: 600;
+  color: var(--navy-900);
+  white-space: nowrap;
+}
+
+.table__actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.table__actions-head {
+  text-align: right;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--ink-700);
+}
+
+/* ---------- 8. Empty state ---------- */
+.empty-state {
+  text-align: center;
+  padding: 2.2rem 1rem 2.4rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  background: #fbfdff;
+}
+
+.empty-state__icon {
+  font-size: 2.2rem;
+  margin: 0 0 0.4rem;
+}
+
+.empty-state__title {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  color: var(--navy-900);
+}
+
+.empty-state__text {
+  margin: 0 auto 1rem;
+  max-width: 34ch;
+  font-size: 0.86rem;
+  color: var(--ink-500);
+}
+
+/* ---------- 9. Dialog ---------- */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 37, 69, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+  /* Subtle fade-in without needing an animation library */
+  animation: fadeIn 0.12s ease-out;
+}
+
+.dialog {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 40px rgba(11, 37, 69, 0.3);
+  width: 100%;
+  max-width: 420px;
+  padding: 1.3rem 1.4rem 1.2rem;
+  animation: popIn 0.14s ease-out;
+}
+
+.dialog__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  color: var(--navy-900);
+}
+
+.dialog__body {
+  font-size: 0.9rem;
+  color: var(--ink-700);
+  margin-bottom: 1.2rem;
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- 10. Responsive tweaks ---------- */
+@media (max-width: 900px) {
+  /* Stack the form and the demo panel */
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    align-items: stretch;
+  }
+
+  .searchbar {
+    max-width: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .main {
+    padding: 1rem 0.8rem 2rem;
+  }
+
+  .card {
+    padding: 1rem 0.95rem 1.1rem;
+  }
+
+  .topbar__logo {
+    font-size: 1.5rem;
+  }
+
+  /* Full-width buttons are easier to tap on a phone */
+  .form__actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .toolbar__demo .btn {
+    flex: 1 1 auto;
+  }
+
+  .dialog__actions .btn {
+    flex: 1;
+  }
+}
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- 11. Step 2 additions: validation + loading states ---------- */
+
+/* Red border on a field the server or client rejected */
+.form__input--invalid,
+.form__input--invalid:hover {
+  border-color: var(--red-600);
+  background: #fffafa;
+}
+
+.form__input--invalid:focus {
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 3px rgba(179, 38, 30, 0.16);
+}
+
+/* The message shown under an invalid field */
+.form__error {
+  margin: 0.1rem 0 0;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--red-600);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.form__error::before {
+  content: '!';
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1.35;
+  flex: 0 0 auto;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 50%;
+  background: var(--red-600);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.05rem;
+}
+
+/* Small helper text under a field (never shown together with an error) */
+.form__hint-text {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-500);
+}
+
+/* Disabled buttons must LOOK disabled, not just be unclickable */
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.btn:disabled:hover {
+  background: inherit;
+  transform: none;
+}
+
+.btn--primary:disabled:hover {
+  background: var(--blue-600);
+}
+
+/* Inputs are disabled too while a save is in flight */
+.form__input:disabled {
+  background: #f3f6f9;
+  color: var(--ink-500);
+  cursor: not-allowed;
+}
+
+/* Rotating dots feel for the "Saving…" label */
+.btn--primary:disabled {
+  position: relative;
+}
+
+/* ---------- 12. Step 4 additions: sortable table, skeletons, stats ---------- */
+
+/* --- sortable column headers --- */
+.th__button {
+  font: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+
+.th__button:hover {
+  color: var(--blue-600);
+  text-decoration: underline;
+}
+
+.th__button--active {
+  color: var(--blue-600);
+}
+
+.th__plain {
+  white-space: nowrap;
+}
+
+.th__arrow {
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
+/* The idle arrow is very faint: it hints "clickable" without shouting */
+.th__arrow--idle {
+  opacity: 0.25;
+}
+
+.th__button:hover .th__arrow--idle {
+  opacity: 0.6;
+}
+
+/* --- email column can be long; allow wrapping instead of stretching --- */
+.table__email {
+  max-width: 240px;
+  overflow-wrap: anywhere;
+}
+
+/* --- "Refreshing…" hint under the table --- */
+.table__refreshing {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-500);
+  font-style: italic;
+}
+
+/* --- loading skeleton --- */
+.skeleton-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.35rem 0 0.2rem;
+}
+
+.skeleton-row {
+  display: grid;
+  grid-template-columns: 1.4fr 2fr 1fr;
+  gap: 0.8rem;
+}
+
+.skeleton-bar {
+  height: 0.95rem;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #eef2f7 25%, #e3eaf3 37%, #eef2f7 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* --- search spinner (replaces the clear button while loading) --- */
+.searchbar__spinner {
+  position: absolute;
+  /* Sits just left of the clear button (which is at right: 0.35rem) */
+  right: 2rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 2px solid var(--line);
+  border-top-color: var(--blue-600);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- error variant of the empty state --- */
+.empty-state--error {
+  border-color: #f7c9c4;
+  background: var(--red-050);
+}
+
+.empty-state--error .empty-state__title {
+  color: var(--red-600);
+}
+
+/* --- stats card --- */
+.stats {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.stats__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.stats__item:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.stats__item dt {
+  font-size: 0.8rem;
+  color: var(--ink-500);
+}
+
+.stats__item dd {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--navy-900);
+}
+
+/* Longer text values (e.g. the active search term) read better smaller */
+.stats__item dd.stats__small {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-700);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
