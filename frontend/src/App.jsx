@@ -266,9 +266,6 @@ function App() {
             </span>
             <div>
               <h1 className="topbar__title">Student Management System</h1>
-              <p className="topbar__subtitle">
-                Auspify SMS · live data from Flask + SQLite
-              </p>
             </div>
           </div>
         </div>
@@ -348,10 +345,6 @@ function App() {
           searchTerm={searchTerm}
         />
       </main>
-
-      <footer className="footer">
-        <p>Flask + React + SQLite · built step by step</p>
-      </footer>
 
       <ConfirmDialog
         isOpen={Boolean(dialogStudent)}
