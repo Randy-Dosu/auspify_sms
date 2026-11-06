@@ -78,8 +78,9 @@ function StudentTable({ students = [], onEdit, onDelete, onAddFirst }) {
 
           <tbody>
             {students.map((student) => (
-              // `id` is the database primary key - unique, so a safe React key.
-              <tr key={student.id}>
+              // student_id is unique in the database, so it is the safest
+              // React key (plain `id` can clash with preview/dummy rows).
+              <tr key={student.student_id ?? student.id}>
                 <td className="mono">{student.student_id}</td>
                 <td className="table__name">{student.full_name}</td>
                 <td>{student.age}</td>

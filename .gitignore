@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Student Management System
+students.db
+students.db-journal
+backend/students.db

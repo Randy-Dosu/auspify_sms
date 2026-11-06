@@ -693,3 +693,80 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------- 11. Step 2 additions: validation + loading states ---------- */
+
+/* Red border on a field the server or client rejected */
+.form__input--invalid,
+.form__input--invalid:hover {
+  border-color: var(--red-600);
+  background: #fffafa;
+}
+
+.form__input--invalid:focus {
+  border-color: var(--red-600);
+  box-shadow: 0 0 0 3px rgba(179, 38, 30, 0.16);
+}
+
+/* The message shown under an invalid field */
+.form__error {
+  margin: 0.1rem 0 0;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--red-600);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.form__error::before {
+  content: '!';
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 1.35;
+  flex: 0 0 auto;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 50%;
+  background: var(--red-600);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.05rem;
+}
+
+/* Small helper text under a field (never shown together with an error) */
+.form__hint-text {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-500);
+}
+
+/* Disabled buttons must LOOK disabled, not just be unclickable */
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.btn:disabled:hover {
+  background: inherit;
+  transform: none;
+}
+
+.btn--primary:disabled:hover {
+  background: var(--blue-600);
+}
+
+/* Inputs are disabled too while a save is in flight */
+.form__input:disabled {
+  background: #f3f6f9;
+  color: var(--ink-500);
+  cursor: not-allowed;
+}
+
+/* Rotating dots feel for the "Saving…" label */
+.btn--primary:disabled {
+  position: relative;
+}
