@@ -144,13 +144,13 @@ Base URL: `http://127.0.0.1:5000/api`
 {
   "id": 1,
   "student_id": "AUS-2024-001",
-  "full_name": "Ama Serwaa Mensah",
-  "age": 20,
-  "gender": "Female",
-  "email": "ama.mensah@example.com",
+  "full_name": "Randy Odawutey",
+  "age": 19,
+  "gender": "Male",
+  "email": "randyodawutey@example.com",
   "phone": "+233241112233",
   "course": "Computer Science",
-  "year": 2,
+  "year": 3,
   "created_at": "2026-11-06 08:31:06"
 }
 ```
