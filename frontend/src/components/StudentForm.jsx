@@ -102,7 +102,7 @@ function StudentForm({
             <input
               {...inputProps('full_name')}
               type="text"
-              placeholder="e.g. Ama Serwaa Mensah"
+              placeholder="Randy Odawutey"
               autoComplete="name"
             />
           </Field>
@@ -111,7 +111,7 @@ function StudentForm({
             <input
               {...inputProps('student_id')}
               type="text"
-              placeholder="e.g. AUS-2024-001"
+              placeholder="AUS-2026-001"
               autoComplete="off"
             />
           </Field>
@@ -123,7 +123,7 @@ function StudentForm({
               min="1"
               max="120"
               step="1"
-              placeholder="e.g. 20"
+              placeholder="19"
               inputMode="numeric"
             />
           </Field>
@@ -143,7 +143,7 @@ function StudentForm({
             <input
               {...inputProps('email')}
               type="email"
-              placeholder="e.g. ama.mensah@example.com"
+              placeholder="randyodawutey@example.com"
               autoComplete="email"
             />
           </Field>
