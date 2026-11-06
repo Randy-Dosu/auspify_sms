@@ -94,3 +94,16 @@ export function createStudent(payload) {
     body: JSON.stringify(payload),
   })
 }
+
+/** PUT /api/students/:id - update an existing student. */
+export function updateStudent(id, payload) {
+  return request(`/students/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+/** DELETE /api/students/:id - remove a student. */
+export function deleteStudent(id) {
+  return request(`/students/${id}`, { method: 'DELETE' })
+}

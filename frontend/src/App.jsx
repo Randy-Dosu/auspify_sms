@@ -25,8 +25,9 @@ import SearchBar from './components/SearchBar'
 import ConfirmDialog from './components/ConfirmDialog'
 import Notification from './components/Notification'
 import { dummyStudents } from './data/dummyStudents'
-import { createStudent, ApiError } from './api'
+import { createStudent, updateStudent, deleteStudent, ApiError } from './api'
 import { validateStudent, toApiPayload } from './utils/validateStudent'
+import { scrollToAndFocus } from './utils/scrollTo'
 import './App.css'
 
 // The shape of an empty form. One place means "Clear" and "Cancel" always
@@ -46,6 +47,8 @@ function App() {
   const [students, setStudents] = useState(dummyStudents)
   const [formValues, setFormValues] = useState(EMPTY_FORM)
   const [fieldErrors, setFieldErrors] = useState({})
+  // The database id of the record currently loaded in the form (null = new).
+  const [editingId, setEditingId] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -59,6 +62,7 @@ function App() {
     setFormValues(EMPTY_FORM)
     setFieldErrors({})
     setIsEditing(false)
+    setEditingId(null)
   }
 
   // ---------- handlers passed to children ----------
@@ -75,7 +79,7 @@ function App() {
     })
   }
 
-  // 2) Submitting the form -> validate, then POST.
+  // 2) Submitting the form -> validate, then POST (create) or PUT (update).
   const handleFormSubmit = async () => {
     setNotice(null)
 
@@ -90,22 +94,29 @@ function App() {
     // (b) Ask the server.
     setIsSubmitting(true)
     try {
-      const created = await createStudent(toApiPayload(formValues))
+      const payload = toApiPayload(formValues)
+      const saved = isEditing
+        ? await updateStudent(editingId, payload)
+        : await createStudent(payload)
 
-      // Show the new record straight away so the user sees the result even
-      // though Step 4 has not wired the real list yet.
-      // Dedupe on student_id, the natural unique key. Using `id` here would
-      // be a bug: the dummy rows above also have small ids, so a real record
-      // with id 4 would silently remove the dummy row with id 4.
+      // Replace the row if it exists, otherwise add it at the top.
+      // Matching on student_id (the natural unique key) also covers the case
+      // where the user changed the record's id.
       setStudents((previous) => [
-        created,
-        ...previous.filter((student) => student.student_id !== created.student_id),
+        saved,
+        ...previous.filter(
+          (student) =>
+            student.id !== saved.id && student.student_id !== saved.student_id,
+        ),
       ])
 
+      const wasEditing = isEditing
       resetForm()
       notify(
         'success',
-        `${created.full_name} was added successfully (ID ${created.student_id}).`,
+        wasEditing
+          ? `${saved.full_name} was updated successfully.`
+          : `${saved.full_name} was added successfully (ID ${saved.student_id}).`,
       )
     } catch (error) {
       if (error instanceof ApiError) {
@@ -144,7 +155,10 @@ function App() {
     })
     setFieldErrors({})
     setIsEditing(true)
-    notify('info', `Loaded ${student.full_name} into the form (updating arrives in Step 3).`)
+    setEditingId(student.id ?? null)
+    setNotice(null)
+    // Scroll the form into view so the user sees where the data went.
+    scrollToAndFocus('full_name')
   }
 
   // 4) Delete button opens the confirmation dialog
@@ -155,10 +169,33 @@ function App() {
     notify('info', 'Delete cancelled — nothing was removed.')
   }
 
-  const handleDeleteConfirm = () => {
-    // Step 2 only shows the dialog; actual removal is Step 3.
-    notify('info', `Delete confirmed for ${dialogStudent?.full_name} (not removed yet).`)
-    setDialogStudent(null)
+  // Confirmed delete -> DELETE /api/students/:id
+  const handleDeleteConfirm = async () => {
+    const target = dialogStudent
+    if (!target) return
+
+    setDialogStudent(null) // close the modal immediately
+    setIsSubmitting(true)
+    try {
+      await deleteStudent(target.id)
+      setStudents((previous) => previous.filter((s) => s.id !== target.id))
+
+      // If the deleted student was loaded in the form, clear it so the form
+      // cannot PUT to a row that no longer exists.
+      if (editingId === target.id) resetForm()
+
+      notify('success', `${target.full_name} was deleted.`)
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) {
+        // Already gone (maybe another tab deleted it) -> reconcile the UI.
+        setStudents((previous) => previous.filter((s) => s.id !== target.id))
+        notify('info', 'That student was already deleted.')
+      } else {
+        notify('error', error.message)
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // 5) Search box - stored, but filtering is Step 4.
@@ -260,13 +297,7 @@ function App() {
           students={students}
           onEdit={handleEdit}
           onDelete={handleDeleteRequest}
-          onAddFirst={() => {
-            document.getElementById('full_name')?.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center',
-            })
-            document.getElementById('full_name')?.focus()
-          }}
+          onAddFirst={() => scrollToAndFocus('full_name')}
         />
       </main>
 

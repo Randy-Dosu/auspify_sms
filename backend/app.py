@@ -5,6 +5,7 @@ Student Management System - Flask backend
 Steps implemented so far:
   * Step 0 - health route so the frontend can prove it can reach the API
   * Step 2 - automatic SQLite setup + POST /api/students (create)
+  * Step 3 - PUT /api/students/<id> (update) and DELETE /api/students/<id>
 
 Run it with:
     python app.py
@@ -189,6 +190,96 @@ def create_student():
     response.status_code = 201
     response.headers["Location"] = f"/api/students/{cursor.lastrowid}"
     return response
+
+
+
+@app.put("/api/students/<int:student_pk>")
+def update_student(student_pk):
+    """Update an existing student.
+
+    200 OK            -> returns the updated record
+    400 Bad Request   -> validation errors
+    404 Not Found     -> no student with that id
+    409 Conflict      -> student_id/email taken by a DIFFERENT student
+    """
+    db = get_db()
+
+    # 1) The record must exist before we validate anything else.
+    existing = fetch_student(db, student_pk)
+    if existing is None:
+        return error_response(f"Student {student_pk} not found", 404)
+
+    payload = request.get_json(silent=True)
+    if payload is None:
+        return error_response("Request body must be valid JSON", 400)
+
+    data, errors = validate_student(payload)
+    if errors:
+        return error_response("Validation failed", 400, errors)
+
+    # 2) Duplicate check that ignores the record being edited, so saving a
+    #    student with its own unchanged email/ID is allowed.
+    duplicates = find_duplicates(
+        db, data["student_id"], data["email"], exclude_id=student_pk
+    )
+    if duplicates:
+        return error_response("Duplicate student", 409, duplicates)
+
+    try:
+        db.execute(
+            """
+            UPDATE students
+               SET student_id = ?, full_name = ?, age = ?, gender = ?,
+                   email = ?, phone = ?, course = ?, year = ?
+             WHERE id = ?
+            """,
+            (
+                data["student_id"],
+                data["full_name"],
+                data["age"],
+                data.get("gender") or None,
+                data["email"],
+                data.get("phone") or None,
+                data["course"],
+                data.get("year"),
+                student_pk,
+            ),
+        )
+        db.commit()
+    except sqlite3.IntegrityError as exc:
+        db.rollback()
+        message = str(exc).lower()
+        field = "student_id" if "student_id" in message else "email"
+        return error_response(
+            "Duplicate student", 409, {field: "This value is already registered"}
+        )
+
+    return jsonify(fetch_student(db, student_pk)), 200
+
+
+@app.delete("/api/students/<int:student_pk>")
+def delete_student(student_pk):
+    """Delete a student.
+
+    200 OK        -> {"message": "...", "deleted": {...}} (the removed row)
+    404 Not Found -> no student with that id
+
+    We return the deleted record so the UI can show what was removed and
+    could offer an "undo" later.
+    """
+    db = get_db()
+
+    existing = fetch_student(db, student_pk)
+    if existing is None:
+        return error_response(f"Student {student_pk} not found", 404)
+
+    db.execute("DELETE FROM students WHERE id = ?", (student_pk,))
+    db.commit()
+
+    return jsonify(
+        message=f"Student {student_pk} deleted",
+        deleted=existing,
+    ), 200
 
 
 # ---------------------------------------------------------------------------
